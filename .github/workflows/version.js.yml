@@ -1,0 +1,60 @@
+name: Node Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - 'master'
+
+
+jobs:
+  node-pipeline:
+    name: Test pipeline
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+
+      - name: 🚚 Prepare release
+        uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          token: ${{ github.token }}
+
+      - name: Create Git information
+        run: |
+          git --version
+
+      - name: Create Git information
+        run: cat git.properties
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
