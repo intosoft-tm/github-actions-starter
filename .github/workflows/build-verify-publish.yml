@@ -1,0 +1,22 @@
+name: build, verify and publish
+
+on:
+  workflow_call
+
+jobs:
+  build-verify-publish:
+    name: 🔀 Build, verify and publish
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
