@@ -1,0 +1,16 @@
+name: 🔍 Test Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - release-please--branches--main
+    tags:
+      - v*.*.*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pipeline:
+    name: 🔍 Pipeline
+    uses: ./.github/workflows/build-verify-publish.yml
