@@ -1,0 +1,38 @@
+name: 🔀 Test Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - 'release-please--branches--main'
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  pipeline:
+    name: 🔍 pipeline
+    uses: ./.github/workflows/pipeline.yml
+
+  release:
+    name: 🔍 release
+    uses: ./.github/workflows/release.yml
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+
+  test-pipeline:
+    name: ▶️ Run CI pipeline
+    runs-on: ubuntu-latest
+    needs:
+      - pipeline
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
