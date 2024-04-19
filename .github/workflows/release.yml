@@ -1,0 +1,31 @@
+name: 🚚 Release
+
+on:
+  workflow_run:
+    workflows: [blabla]
+    branches:
+      - main
+    types:
+      - completed
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  release-pipeline:
+    name: ▶️ Run
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
+    - name: 🚚 Prepare release
+      uses: googleapis/release-please-action@v4
+      id: release
+      with:
+        token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
