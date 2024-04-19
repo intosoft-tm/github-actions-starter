@@ -1,0 +1,68 @@
+name: Node Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - 'master'
+
+
+jobs:
+  node-pipeline:
+    name: Test pipeline
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+
+      - name: 🚚 Prepare release
+        uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          token: ${{ github.token }}
+
+      - name: Create Git information
+        run: |
+          echo \"git.commit.id.abbrev=$(git rev-parse --short=7 HEAD)\" > git.properties
+#          echo "git.commit.id=$(git rev-parse HEAD)" >> git.properties
+#          echo "git.commit.user.email=$(git log -1 --pretty=format:%ae)" >> git.properties
+#          echo "git.commit.message.full=$(git log -1 --pretty=format:%B)" >> git.properties
+#          echo "git.commit.message.short=$(git log -1 --pretty=format:%s)" >> git.properties
+#          echo "git.commit.user.name=$(git log -1 --pretty=format:%an)" >> git.properties
+#          echo "git.commit.time=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict)" >> git.properties
+#          echo "git.branch=$(git symbolic-ref HEAD | sed -e "s/refs\\/heads\\//"/)" >> git.properties
+#          echo "git.tags=$(git describe --tags)" >> git.properties
+
+      - name: Create Git information
+        run: cat git.properties
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
