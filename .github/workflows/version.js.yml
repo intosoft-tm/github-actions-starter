@@ -52,7 +52,7 @@ jobs:
           echo git.commit.user.name=$(git log -1 --pretty=format:%an) >> git.properties
           echo git.commit.time=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict) >> git.properties
           echo git.branch=$(git symbolic-ref HEAD | sed -e s/refs\\/heads\\///) >> git.properties
-          echo git.tags=$(git describe --tags) >> git.properties
+          echo git.tags=$(git tag) >> git.properties
 
       - name: Create Git information
         run: cat git.properties
