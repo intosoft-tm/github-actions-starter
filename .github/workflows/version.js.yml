@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-tags: true
 
       - name: Dump GitHub context
         env:
@@ -52,7 +54,7 @@ jobs:
           echo git.commit.user.name=$(git log -1 --pretty=format:%an) >> git.properties
           echo git.commit.time=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict) >> git.properties
           echo git.branch=$(git symbolic-ref HEAD | sed -e s/refs\\/heads\\///) >> git.properties
-          echo git.tags=$(git tag) >> git.properties
+          echo git.tags=$(git describe --tags --abbrev=0) >> git.properties
 
       - name: Create Git information
         run: cat git.properties
