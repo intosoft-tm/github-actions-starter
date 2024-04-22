@@ -25,8 +25,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-tags: true
 
       - name: Dump GitHub context
         env:
@@ -46,6 +44,7 @@ jobs:
 
       - name: Create Git information
         run: |
+          echo $(git fetch --unshallow --tags)
           echo git.commit.id.abbrev=$(git rev-parse --short=7 HEAD) > git.properties
           echo git.commit.id=$(git rev-parse HEAD) >> git.properties
           echo git.commit.user.email=$(git log -1 --pretty=format:%ae) >> git.properties
@@ -53,7 +52,7 @@ jobs:
           echo git.commit.message.short=$(git log -1 --pretty=format:%s) >> git.properties
           echo git.commit.user.name=$(git log -1 --pretty=format:%an) >> git.properties
           echo git.commit.time=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict) >> git.properties
-          echo git.branch=$(git symbolic-ref HEAD | sed -e s/refs\\/heads\\///) >> git.properties
+          echo git.branch=${{ github.head_ref || github.ref_name }}  >> git.properties
           echo git.tags=$(git describe --tags --abbrev=0) >> git.properties
 
       - name: Create Git information
@@ -68,3 +67,18 @@ jobs:
         env:
           JOB_CONTEXT: ${{ toJson(job) }}
         run: echo "$JOB_CONTEXT"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            name/app
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Print tags
+        run: echo ${{ steps.meta.outputs.tags }}
