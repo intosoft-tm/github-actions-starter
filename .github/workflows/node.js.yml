@@ -1,19 +1,18 @@
-name: Test Pipeline
+name: Node Pipeline
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-    tags:
-      - "v*.*.*"
-  pull_request:
-    branches:
-      - 'main'
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
 
 jobs:
   node-pipeline:
-    name: Test pipeline
+    name: Node pipeline
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,9 +23,26 @@ jobs:
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
+
+      - name: 🔋 Setup node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-          fetch-tags: true
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📁 Cache node modules
+        uses: ./.github/actions/cache-node-modules
+        id: cache-node-modules
+
+      - name: 🔧 Run clean install
+        run: npm ci
+        if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
+
+      - name: 📋 Run tests
+        run: npm run test
+
+      - name: 📦 Run production packaging
+        run: npm run dist
 
       - name: 🚚 Prepare release
         uses: google-github-actions/release-please-action@v4
@@ -34,28 +50,12 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - name: 📋 Create build information
-        uses: ./.github/actions/create-build-info
-        id: create-build-info
-        with:
-          is-release: ${{ steps.release.outputs.release_created }}
-          output-file: git.properties
-          github-token: ${{ secrets.GH_TOKEN }}
-
-      - name: Print Git information
-        run: cat git.properties
-
       - name: 🔢 Set up tags
-        uses: ./.github/actions/setup-docker-tags
-        id: setup-docker-tags
+        uses: ./.github/actions/setup-tags
+        id: setup-tags
         with:
           is-release: ${{ steps.release.outputs.release_created }}
-          version: ${{ steps.create-build-info.outputs.version }}
+          version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
 
       - name: 💻 Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -76,14 +76,14 @@ jobs:
         with:
           images: |
             ghcr.io/${{ github.repository }}
-          tags: ${{ steps.setup-docker-tags.outputs.docker-tags }}
+          tags: ${{ steps.setup-tags.outputs.tags }}
 
       - name: 🐋 Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/Dockerfile
-          push: true
+          file: docker/Dockerfile.nginx
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
