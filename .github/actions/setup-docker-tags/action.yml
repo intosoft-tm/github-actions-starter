@@ -1,0 +1,41 @@
+name: 'Setup docker tags'
+description: 'Setup docker tags'
+inputs:
+  is-release:
+    description: 'Is release'
+    required: true
+  version:
+    description: 'Version'
+    required: true
+outputs:
+  docker-tags:
+    description: 'Docker tags'
+    value: ${{ steps.setup-docker-tag.outputs.setup-docker-tags }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup docker tags
+      shell: bash
+      id: setup-docker-tag
+      env:
+        is_release: ${{ inputs.is-release }}
+        is_pr: ${{ github.event_name == 'pull_request' }}
+        version: ${{ inputs.version }}
+      run: |
+        tags=""
+        if [[ "$is_release" = 'true' ]]; then
+          tags="type=semver,pattern={{version}},value=$version
+                type=semver,pattern={{major}},value=$version
+                type=semver,pattern={{major}}.{{minor}},value=$version"
+        elif [[ "$is_pr" = 'true' ]]; then
+          tags="type=raw,value=$version"
+        else
+          tags="type=sha,value=sha-${GITHUB_SHA::7}
+                type=raw,value=$version"
+        fi
+        {
+          echo 'docker-tags<<EOF';
+          echo "$tags"
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
