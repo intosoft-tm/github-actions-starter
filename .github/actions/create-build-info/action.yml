@@ -7,25 +7,40 @@ inputs:
   output-file:
     description: 'Output file'
     required: true
+  github-token:
+    description: Github token passed from calling workflow
+    required: true
 outputs:
   version:
     description: 'Version'
-    value: ${{ steps.build-info.outputs.version }}
+    value: ${{ steps.create-build-info.outputs.version }}
 runs:
   using: "composite"
   steps:
     - name: Create build info
       shell: bash
-      id: build-info
+      id: create-build-info
       env:
         is_release: ${{ inputs.is-release }}
         is_pr: ${{ github.event_name == 'pull_request' }}
         event: ${{ format('{0}-{1}', github.event_name, github.event.number) }}
         run_number: ${{ github.run_number }}
         output_file: ${{ inputs.output-file }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
+        tag=""
+        
         tag=$(git describe --tags --abbrev=0)
+        
         version=""
+
+        {
+          echo 'version<<EOF';
+          echo "$version"
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
         url=""
         if [[  "$is_release" = 'true' ]]; then
           version="$tag"
@@ -34,7 +49,7 @@ runs:
           version="$tag-$event-build-$run_number-$branch-sha-${GITHUB_SHA::7}"
           url=${{ github.event.pull_request._links.html }}
         fi
-        
+ 
         echo git.commit.id.abbrev=$(git rev-parse --short=7 HEAD) > $output_file
         echo git.commit.id=$(git rev-parse HEAD) >> $output_file
         echo git.commit.user.email=$(git log -1 --pretty=format:%ae) >> $output_file
@@ -43,14 +58,8 @@ runs:
         echo git.commit.user.name=$(git log -1 --pretty=format:%an) >> $output_file
         echo git.commit.time=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict) >> $output_file
         echo git.commit.url=$(git log -1 --pretty=format:%ct --format=%cd --date=iso-strict) >> $output_file
-        
-        echo git.tags=$(git describe --tags --abbrev=0) >> $output_file
+
+        echo git.tags=$tag >> $output_file
         echo git.url=$url >> $output_file
         echo git.build.version=$version > $output_file
         echo git.branch=${{ github.head_ref || github.ref_name }} >> $output_file
-        
-        {
-          echo 'version<<EOF';
-          echo "$version"
-          echo EOF
-        } >> "$GITHUB_OUTPUT"
