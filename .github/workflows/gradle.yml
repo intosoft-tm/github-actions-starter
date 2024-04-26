@@ -4,25 +4,30 @@ on:
   workflow_call:
     inputs:
       config-path:
-        required: true
+        required: false
         type: string
     secrets:
-      token:
+      AXON_BRAVE_OBSERVABILITY_GITHUB_ACTOR:
+        required: true
+      AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN:
+        required: true
+      GH_TOKEN:
         required: true
 
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
 jobs:
-  node-pipeline:
-    name: Node.js pipeline
+  grade-pipeline:
+    name: Gradle pipeline
     runs-on: ubuntu-latest
 
     env:
       AXON_BRAVE_OBSERVABILITY_GITHUB_ACTOR: ${{ secrets.AXON_BRAVE_OBSERVABILITY_GITHUB_ACTOR }}
       AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN: ${{ secrets.AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN }}
-
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
       - name: ⬇️ Checkout
@@ -38,11 +43,12 @@ jobs:
           token: ${{ github.token }}
 
       - name: 📋 Create build information
-        uses: ./.github/actions/build-info
-        id: build-info
+        uses: Tomasz-Marciniak/actions/create-build-info@main
+        id: create-build-info
         with:
           is-release: ${{ steps.release.outputs.release_created }}
           output-file: git.properties
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: 🔋 Set up JDK 21
         uses: actions/setup-java@v4
@@ -73,11 +79,11 @@ jobs:
         run: ./gradlew nativeCompile
 
       - name: 🔢 Set up tags
-        uses: ./.github/actions/setup-docker-tags
+        uses: Tomasz-Marciniak/github-actions-starter/.github/actions/setup-docker-tags@main
         id: setup-docker-tags
         with:
           is-release: ${{ steps.release.outputs.release_created }}
-          version: ${{ steps.build-info.outputs.version }}
+          version: ${{ steps.create-build-info.outputs.version }}
 
       - name: 💻 Set up QEMU
         uses: docker/setup-qemu-action@v3
