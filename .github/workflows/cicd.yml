@@ -1,0 +1,65 @@
+name: 🔀 Test Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  node-pipeline:
+    name: 🔍 Test
+    uses: ./.github/workflows/node.js.yml
+    if: true # easily disable if needed
+    with:
+      actions-branch: main
+      mock-run: true
+    secrets:
+      READ_WRITE_PACKAGES_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+
+  gradle-pipeline:
+    name: 🔍 Test
+    uses: ./.github/workflows/gradle.yml
+    if: true # easily disable if needed
+    with:
+      actions-branch: main
+      mock-run: true
+    secrets:
+      AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN: 'DUMMY'
+      READ_WRITE_PACKAGES_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+
+  cicd-pipeline:
+    name: ▶️ Run CICD pipeline
+    runs-on: ubuntu-latest
+    needs:
+      - gradle-pipeline
+      - node-pipeline
+
+    steps:
+      - name: 🚚 Prepare release
+        uses: google-github-actions/release-please-action@v4
+        id: release
+        if: ${{env.SKIP_RELEASE == ''}}
+        with:
+          token: ${{ github.token }}
+
+      - name: 🗑️ Delete packages
+        uses: actions/delete-package-versions@v5
+        if: ${{env.SKIP_RELEASE == ''}}
+        with:
+          package-name: ${{ github.event.repository.name }}
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-pre-release-versions: "true"
+          token: ${{ github.token }}
+
