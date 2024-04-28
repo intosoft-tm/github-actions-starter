@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/Tomasz-Marciniak/github-actions-starter/compare/v0.2.0...v0.3.0) (2024-04-28)
+
+
+### Features
+
+* tag test ([b0cf112](https://github.com/Tomasz-Marciniak/github-actions-starter/commit/b0cf112e6740fce2eab78b06752d5961263b7c00))
+
 ## [0.2.0](https://github.com/Tomasz-Marciniak/github-actions-starter/compare/v0.1.0...v0.2.0) (2024-04-28)
 
 
