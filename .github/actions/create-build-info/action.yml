@@ -1,14 +1,17 @@
 name: 'Create build info'
 description: 'Create build info'
 inputs:
-  is-release:
-    description: 'Is release'
+  release-created:
+    description: 'Release created'
     required: true
+  release-version:
+    description: 'Release version'
+    required: true
+  release-html-url:
+    description: 'URL of created release'
+    required: false
   output-file:
     description: 'Output file'
-    required: true
-  github-token:
-    description: Github token passed from calling workflow
     required: true
 outputs:
   version:
@@ -21,33 +24,46 @@ runs:
       shell: bash
       id: create-build-info
       env:
-        is_release: ${{ inputs.is-release }}
-        is_pr: ${{ github.event_name == 'pull_request' }}
-        event: ${{ format('{0}-{1}', github.event_name, github.event.number) }}
-        run_number: ${{ github.run_number }}
+        is_release: ${{ inputs.release-created }}
+        release_html_url: ${{ inputs.release-html-url }}
         output_file: ${{ inputs.output-file }}
-        GH_TOKEN: ${{ inputs.github-token }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
+        release_version: ${{ inputs.release-version }}
       run: |
-        tag=$(git describe --tags --abbrev=0)
-        
+        tag=""
         version=""
-
-        {
-          echo 'version<<EOF';
-          echo "$version"
-          echo EOF
-        } >> "$GITHUB_OUTPUT"
-
         url=""
-        if [[  "$is_release" = 'true' ]]; then
-          version="$tag"
-        else
-          branch=$(echo ${{ github.head_ref }} | sed "s/[^[:alnum:].-]/-/g")
-          version="$tag-$event-build-$run_number-$branch-sha-${GITHUB_SHA::7}"
-          url=${{ github.event.pull_request._links.html }}
+       
+        if ! tag="$(git describe --tags --abbrev=0)"; then
+          echo -e "\e[33mCould not resolve last tag, will tag as not-released\e[0m"
+          tag="unreleased"
         fi
- 
+        
+        echo "Tag: $tag"
+        echo "Is release: $is_release"
+        
+        if [[ "$is_release" = 'true' ]]; then
+          version="$tag"
+          url=$release_html_url
+        elif [[ ${{ github.event_name  }} = 'pull_request' ]] ; then
+        
+          # Replace all invalid characters with hyphen
+          branch=$(echo ${{ github.head_ref || github.ref_name }} | sed "s/[^[:alnum:].-]/-/g")
+        
+          # Use format: v0.1.0-sha-0123456-pull-request-1-1-some-feature
+          version="$tag-sha-${GITHUB_SHA::7}-${{ github.event_name }}-${{ github.event.number }}-build-${{ github.run_number }}-$branch"
+        
+          url=${{ github.event.pull_request._links.html }}
+        elif [[ ${{ github.event_name }} = 'push' ]] ; then
+        
+          # Use format: v0.1.0-sha-0123456
+          version="$tag-sha-${GITHUB_SHA::7}"
+        
+          url=${{ github.event.url }}
+        fi
+        
+        echo "Version: $version"
+        echo "Url: $url"
+        
         echo git.commit.id.abbrev=$(git rev-parse --short=7 HEAD) > $output_file
         echo git.commit.id=$(git rev-parse HEAD) >> $output_file
         echo git.commit.user.email=$(git log -1 --pretty=format:%ae) >> $output_file
@@ -61,3 +77,9 @@ runs:
         echo git.url=$url >> $output_file
         echo git.build.version=$version > $output_file
         echo git.branch=${{ github.head_ref || github.ref_name }} >> $output_file
+
+        {
+          echo 'version<<EOF';
+          echo "$version"
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
