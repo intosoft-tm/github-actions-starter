@@ -7,10 +7,14 @@ inputs:
   version:
     description: 'Version'
     required: true
+  suffix:
+    description: 'Version'
+    required: false
+    default: ''
 outputs:
   docker-tags:
     description: 'Docker tags'
-    value: ${{ steps.setup-docker-tag.outputs.setup-docker-tags }}
+    value: ${{ steps.setup-docker-tag.outputs.docker-tags }}
 
 runs:
   using: "composite"
@@ -22,17 +26,15 @@ runs:
         is_release: ${{ inputs.is-release }}
         is_pr: ${{ github.event_name == 'pull_request' }}
         version: ${{ inputs.version }}
+        suffix: ${{ inputs.suffix }}
       run: |
         tags=""
         if [[ "$is_release" = 'true' ]]; then
-          tags="type=semver,pattern={{version}},value=$version
-                type=semver,pattern={{major}},value=$version
-                type=semver,pattern={{major}}.{{minor}},value=$version"
+          tags="type=semver,pattern={{version}},suffix=$suffix,value=$version
+                type=semver,pattern={{major}},suffix=$suffix,value=$version
+                type=semver,pattern={{major}}.{{minor}},suffix=$suffix,value=$version"
         elif [[ "$is_pr" = 'true' ]]; then
-          tags="type=raw,value=$version"
-        else
-          tags="type=sha,value=sha-${GITHUB_SHA::7}
-                type=raw,value=$version"
+          tags="type=raw,suffix=$suffix,value=$version"
         fi
         {
           echo 'docker-tags<<EOF';

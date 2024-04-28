@@ -1,36 +1,76 @@
-name: Node Pipeline
-
 on:
   workflow_call:
     inputs:
-      config-path:
+      actions-branch:
         required: true
         type: string
+      mock-run:
+        required: false
+        type: boolean
+        default: false
     secrets:
-      token:
+      READ_WRITE_PACKAGES_TOKEN:
         required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
 
 jobs:
   node-pipeline:
-    name: Node pipeline
+    name: 🔀 Node.js pipeline
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
-
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: 🔋 Setup node
+      - name: 🛠️️ Checkout actions
+        uses: actions/checkout@v4
+        with:
+          repository: Tomasz-Marciniak/github-actions-starter
+          path: github-actions-starter
+          ref: ${{ inputs.actions-branch }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+          sparse-checkout: |
+            .github/actions/cache-node-modules
+            .github/actions/create-build-info
+            .github/actions/setup-docker-tags
+
+      - name: 💾 Copy actions
+        if: ${{ !inputs.mock-run }}
+        run: mkdir -p ".github/actions" && cp -r github-actions-starter/.github/actions/* .github/actions
+
+      - name: 🤖 Setup mocks
+        if: ${{ inputs.mock-run }}
+        run: |
+          cp ./mocks/node.js/* ./
+          cp ./docker/Dockerfile ./docker/Dockerfile.nginx
+
+      - name: 🚚 Prepare release
+        uses: google-github-actions/release-please-action@v4
+        id: release
+        if: ${{ !inputs.mock-run }}
+        with:
+          token: ${{ github.token }}
+
+      - name: 📋 Create build information
+        uses: ./.github/actions/create-build-info
+        id: create-build-info
+        with:
+          is-release: ${{ steps.release.outputs.release_created }}
+          output-file: git.properties
+
+      - name: 🔋 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
-      - name: 📁 Cache node modules
+      - name: ♻️ Cache node modules
         uses: ./.github/actions/cache-node-modules
         id: cache-node-modules
 
@@ -38,24 +78,18 @@ jobs:
         run: npm ci
         if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
 
-      - name: 📋 Run tests
+      - name: 🔍 Run tests
         run: npm run test
 
       - name: 📦 Run production packaging
         run: npm run dist
 
-      - name: 🚚 Prepare release
-        uses: google-github-actions/release-please-action@v4
-        id: release
-        with:
-          token: ${{ github.token }}
-
       - name: 🔢 Set up tags
-        uses: ./.github/actions/setup-tags
-        id: setup-tags
+        uses: ./.github/actions/setup-docker-tags
+        id: setup-docker-tags
         with:
           is-release: ${{ steps.release.outputs.release_created }}
-          version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          version: ${{ steps.create-build-info.outputs.version }}
 
       - name: 💻 Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -68,24 +102,32 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: 🏷 Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ghcr.io/${{ github.repository }}
-          tags: ${{ steps.setup-tags.outputs.tags }}
+          images: ghcr.io/${{ github.repository }}
+          tags: ${{ steps.setup-docker-tags.outputs.docker-tags }}
 
       - name: 🐋 Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile.nginx
-          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: 🗑️ Delete packages
+        uses: actions/delete-package-versions@v5
+        if: ${{ !inputs.mock-run }}
+        with:
+          package-name: ${{ github.event.repository.name }}
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-pre-release-versions: "true"
+          token: ${{ github.token }}
