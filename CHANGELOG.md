@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/Tomasz-Marciniak/github-actions-starter/compare/v0.4.0...v0.5.0) (2024-05-01)
+
+
+### Features
+
+* support for non tags branches ([2bfde92](https://github.com/Tomasz-Marciniak/github-actions-starter/commit/2bfde925e3f311e2abda880c8b1c271987915fdf))
+
 ## [0.4.0](https://github.com/Tomasz-Marciniak/github-actions-starter/compare/v0.3.0...v0.4.0) (2024-04-28)
 
 
