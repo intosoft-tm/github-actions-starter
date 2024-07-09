@@ -9,14 +9,12 @@ on:
         type: boolean
         default: false
     secrets:
-      AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN:
-        required: true
-      READ_WRITE_PACKAGES_TOKEN:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
         required: true
 
 env:
-  AXON_BRAVE_OBSERVABILITY_GITHUB_ACTOR: ''
-  AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN: ${{ secrets.AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN }}
+  READ_WRITE_PACKAGES_GITHUB_ACTOR: ''
+  READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
 permissions:
   contents: write
@@ -46,10 +44,10 @@ jobs:
           repository: Tomasz-Marciniak/github-actions-starter
           path: github-actions-starter
           ref: ${{ inputs.actions-branch }}
-          token: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
           sparse-checkout: |
             .github/actions/create-build-info
-            .github/actions/gradle-run-tests
+            .github/actions/setup-docker-tags
 
       - name: 🗑️ Delete packages
         uses: actions/delete-package-versions@v5
@@ -109,13 +107,12 @@ jobs:
           name: tests-report
           path: ./build/reports/tests
 
-      - name: Cache build
+      - name: ♻️ Cache build
         id: cache-build
         uses: actions/cache@v4
         with:
           path: ./build
           key: ${{ github.run_id }}
-
 
   gradle-jar-pipeline:
     name: 🔀 JAR image
@@ -134,7 +131,7 @@ jobs:
           repository: Tomasz-Marciniak/github-actions-starter
           path: github-actions-starter
           ref: ${{ inputs.actions-branch }}
-          token: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
           sparse-checkout: |
             .github/actions/setup-docker-tags
 
@@ -223,7 +220,7 @@ jobs:
           repository: Tomasz-Marciniak/github-actions-starter
           path: github-actions-starter
           ref: ${{ inputs.actions-branch }}
-          token: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
           sparse-checkout: |
             .github/actions/setup-docker-tags
 
@@ -231,7 +228,7 @@ jobs:
         if: ${{ !inputs.mock-run }}
         run: mkdir -p ".github/actions" && cp -r github-actions-starter/.github/actions/* .github/actions
 
-      - name: Cache build
+      - name: ♻️ Cache build
         id: cache-build
         uses: actions/cache@v4
         with:

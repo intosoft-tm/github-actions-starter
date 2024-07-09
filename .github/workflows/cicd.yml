@@ -25,7 +25,7 @@ jobs:
       actions-branch: main
       mock-run: true
     secrets:
-      READ_WRITE_PACKAGES_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+      READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
   gradle-pipeline:
     name: 🔍 Test
@@ -35,14 +35,26 @@ jobs:
       actions-branch: main
       mock-run: true
     secrets:
-      AXON_BRAVE_OBSERVABILITY_GITHUB_TOKEN: 'DUMMY'
-      READ_WRITE_PACKAGES_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+      READ_WRITE_PACKAGES_GITHUB_ACTOR: 'DUMMY'
+      READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+
+  gradle-lib-pipeline:
+    name: 🔍 Test
+    uses: ./.github/workflows/gradle.lib.yml
+    if: true # easily disable if needed
+    with:
+      actions-branch: main
+      mock-run: true
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_ACTOR: 'DUMMY'
+      READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
   cicd-pipeline:
     name: ▶️ Run CICD pipeline
     runs-on: ubuntu-latest
     needs:
       - gradle-pipeline
+      - gradle-lib-pipeline
       - node-pipeline
 
     steps:

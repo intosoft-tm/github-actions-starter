@@ -11,7 +11,7 @@ Use the cicd pipelines in your project by simply running reusable flows in this 
 2. Create .env file with content:
 
 ```
-   READ_WRITE_PACKAGES_TOKEN=
+   READ_WRITE_PACKAGES_GITHUB_TOKEN=
    GITHUB_TOKEN=
    SKIP_RELEASE=true
 ```
@@ -21,3 +21,9 @@ READ_WRITE_PACKAGES_TOKEN - token with read/write packages access
 GITHUB_TOKEN - token with read/write packages access (can be same as READ_WRITE_PACKAGES_TOKEN)
 
 SKIP_RELEASE=true - no need of running release locally 
+
+3. Run it locally:
+
+```bash
+act --secret-file .env
+```

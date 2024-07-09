@@ -9,7 +9,7 @@ on:
         type: boolean
         default: false
     secrets:
-      READ_WRITE_PACKAGES_TOKEN:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
         required: true
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
           repository: Tomasz-Marciniak/github-actions-starter
           path: github-actions-starter
           ref: ${{ inputs.actions-branch }}
-          token: ${{ secrets.READ_WRITE_PACKAGES_TOKEN }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
           sparse-checkout: |
             .github/actions/cache-node-modules
             .github/actions/create-build-info
