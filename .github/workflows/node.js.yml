@@ -40,6 +40,26 @@ jobs:
             .github/actions/create-build-info
             .github/actions/setup-docker-tags
 
+      - name: 🗑️ Delete packages
+        uses: actions/delete-package-versions@v5
+        if: ${{ !inputs.mock-run }}
+        continue-on-error: true
+        with:
+          package-name: ${{ github.event.repository.name }}
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-pre-release-versions: "true"
+          token: ${{ github.token }}
+
+      - name: 🗑️ Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        if: ${{ !inputs.mock-run }}
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository.url }}
+          retain_days: 30
+          keep_minimum_runs: 10
+
       - name: 💾 Copy actions
         if: ${{ !inputs.mock-run }}
         run: mkdir -p ".github/actions" && cp -r github-actions-starter/.github/actions/* .github/actions
@@ -51,7 +71,7 @@ jobs:
           cp ./docker/Dockerfile ./docker/Dockerfile.nginx
 
       - name: 🚚 Prepare release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         id: release
         if: ${{ !inputs.mock-run }}
         with:
@@ -122,13 +142,3 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: 🗑️ Delete packages
-        uses: actions/delete-package-versions@v5
-        if: ${{ !inputs.mock-run }}
-        with:
-          package-name: ${{ github.event.repository.name }}
-          package-type: 'container'
-          min-versions-to-keep: 10
-          delete-only-pre-release-versions: "true"
-          token: ${{ github.token }}

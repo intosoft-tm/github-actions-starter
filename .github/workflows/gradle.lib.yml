@@ -45,6 +45,15 @@ jobs:
             .github/actions/create-build-info
             .github/actions/gradle-run-tests
 
+      - name: 🗑️ Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        if: ${{ !inputs.mock-run }}
+        with:
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+          repository: ${{ github.event.repository.full_name }}
+          retain_days: 30
+          keep_minimum_runs: 10
+
       - name: 💾 Copy actions
         if: ${{ !inputs.mock-run }}
         run: mkdir -p ".github/actions" && cp -r github-actions-starter/.github/actions/* .github/actions
@@ -57,7 +66,7 @@ jobs:
           cp ./docker/Dockerfile ./docker/Dockerfile.jvm
 
       - name: 🚚 Prepare release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         id: release
         if: ${{ !inputs.mock-run }}
         with:
@@ -98,4 +107,3 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

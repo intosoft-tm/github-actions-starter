@@ -11,7 +11,7 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Tomasz-Marciniak/axon-brave-observability")
         credentials {
-            username = getEnvOrFindProperty( "READ_WRITE_PACKAGES_GITHUB_ACTOR")
+            username = getEnvOrFindProperty("READ_WRITE_PACKAGES_GITHUB_ACTOR")
             password = getEnvOrFindProperty("READ_WRITE_PACKAGES_GITHUB_TOKEN")
         }
     }

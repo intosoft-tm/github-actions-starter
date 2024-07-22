@@ -35,7 +35,6 @@ jobs:
       actions-branch: main
       mock-run: true
     secrets:
-      READ_WRITE_PACKAGES_GITHUB_ACTOR: 'DUMMY'
       READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
   gradle-lib-pipeline:
@@ -46,7 +45,6 @@ jobs:
       actions-branch: main
       mock-run: true
     secrets:
-      READ_WRITE_PACKAGES_GITHUB_ACTOR: 'DUMMY'
       READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
   cicd-pipeline:
@@ -59,7 +57,7 @@ jobs:
 
     steps:
       - name: 🚚 Prepare release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         id: release
         if: ${{env.SKIP_RELEASE == ''}}
         with:
