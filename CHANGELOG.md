@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0](https://github.com/intosoft-tm/github-actions-starter/compare/v0.4.0...v0.5.0) (2024-11-19)
+
+
+### Features
+
+* add delete runs ([e9153f4](https://github.com/intosoft-tm/github-actions-starter/commit/e9153f479dc7132368eac305881232054b1e4c9f))
+* migration to company repository ([043a145](https://github.com/intosoft-tm/github-actions-starter/commit/043a1451ef7ec10fcb2c8784088eb7711e2bdc66))
+* support for non tags branches ([2a48b23](https://github.com/intosoft-tm/github-actions-starter/commit/2a48b23c58db76a8a28cc30b3e7a90de11952ab2))
+* tokens changed ([eeefee1](https://github.com/intosoft-tm/github-actions-starter/commit/eeefee188c52fae73b94659dea7fc25c91f09aea))
+
 ## [0.4.0](https://github.com/Tomasz-Marciniak/github-actions-starter/compare/v0.3.0...v0.4.0) (2024-04-28)
 
 
