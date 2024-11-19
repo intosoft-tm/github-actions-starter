@@ -9,7 +9,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.github.com/Tomasz-Marciniak/axon-brave-observability")
+        url = uri("https://maven.pkg.github.com/intosoft-tm/axon-brave-observability")
         credentials {
             username = getEnvOrFindProperty("READ_WRITE_PACKAGES_GITHUB_ACTOR")
             password = getEnvOrFindProperty("READ_WRITE_PACKAGES_GITHUB_TOKEN")

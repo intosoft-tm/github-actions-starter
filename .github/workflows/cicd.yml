@@ -63,13 +63,3 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: 🗑️ Delete packages
-        uses: actions/delete-package-versions@v5
-        if: ${{env.SKIP_RELEASE == ''}}
-        with:
-          package-name: ${{ github.event.repository.name }}
-          package-type: 'container'
-          min-versions-to-keep: 10
-          delete-only-pre-release-versions: "true"
-          token: ${{ github.token }}
-

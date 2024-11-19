@@ -37,22 +37,13 @@ jobs:
       - name: 🛠️ Checkout actions
         uses: actions/checkout@v4
         with:
-          repository: Tomasz-Marciniak/github-actions-starter
+          repository: intosoft-tm/github-actions-starter
           path: github-actions-starter
           ref: ${{ inputs.actions-branch }}
           token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
           sparse-checkout: |
             .github/actions/create-build-info
             .github/actions/gradle-run-tests
-
-      - name: 🗑️ Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        if: ${{ !inputs.mock-run }}
-        with:
-          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
-          repository: ${{ github.event.repository.full_name }}
-          retain_days: 30
-          keep_minimum_runs: 10
 
       - name: 💾 Copy actions
         if: ${{ !inputs.mock-run }}
