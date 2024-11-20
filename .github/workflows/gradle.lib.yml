@@ -1,0 +1,100 @@
+on:
+  workflow_call:
+    inputs:
+      actions-branch:
+        required: true
+        type: string
+      mock-run:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
+
+env:
+  READ_WRITE_PACKAGES_GITHUB_ACTOR: ''
+  READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+
+  gradle-lib-pipeline:
+    name: 🔀 Library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: 🛠️ Checkout actions
+        uses: actions/checkout@v4
+        with:
+          repository: intosoft-tm/github-actions-starter
+          path: github-actions-starter
+          ref: ${{ inputs.actions-branch }}
+          token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+          sparse-checkout: |
+            .github/actions/create-build-info
+            .github/actions/gradle-run-tests
+
+      - name: 💾 Copy actions
+        if: ${{ !inputs.mock-run }}
+        run: mkdir -p ".github/actions" && cp -r github-actions-starter/.github/actions/* .github/actions
+
+      - name: 🤖 Setup mocks
+        if: ${{ inputs.mock-run }}
+        run: |
+          cp ./mocks/gradle/* .
+          cp -r ./mocks/gradle/.gradle ~
+          cp ./docker/Dockerfile ./docker/Dockerfile.jvm
+
+      - name: 🚚 Prepare release
+        uses: googleapis/release-please-action@v4
+        id: release
+        if: ${{ !inputs.mock-run }}
+        with:
+          token: ${{ github.token }}
+
+      - name: 📋 Create build information
+        uses: ./.github/actions/create-build-info
+        id: create-build-info
+        with:
+          release-created: ${{ steps.release.outputs.release_created }}
+          release-version: v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          output-file: git.properties
+
+      - name: 🔋 Set up Graal VM 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          cache: gradle
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Build with Gradle
+        shell: bash
+        run: ./gradlew clean classes
+
+      - name: 🔍 Run tests
+        run: ./gradlew check
+
+      - name: 🗜️ Archive test reports
+        uses: actions/upload-artifact@v4
+        if: ${{ !inputs.mock-run }}
+        with:
+          name: tests-report
+          path: ./build/reports/tests
+
+      - name: ⬆️ Publish package
+        run: ./gradlew publish
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
