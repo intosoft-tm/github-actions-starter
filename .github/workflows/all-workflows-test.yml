@@ -1,0 +1,29 @@
+name: github actions starter test
+
+on:
+  push:
+    branches-ignore:
+      - release-please--branches--main
+    tags:
+      - v*.*.*
+
+jobs:
+
+  gradle-native:
+    name: Gradle native
+    uses: ./.github/workflows/gradle.yml
+    secrets: inherit
+    with:
+      native: true
+
+  gradle-lib:
+    name: Gradle library
+    uses: ./.github/workflows/gradle.yml
+    secrets: inherit
+    with:
+      library: true
+
+  node-js:
+    name: Node.js
+    uses: ./.github/workflows/node.js.yml
+    secrets: inherit
