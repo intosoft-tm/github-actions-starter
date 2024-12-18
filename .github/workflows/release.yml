@@ -2,11 +2,17 @@ name: release
 
 on:
   workflow_run:
-    workflows: [build verify publish test]
+    workflows:
+      - build verify publish test
+      - github actions starter test
     branches:
       - main
     types:
       - completed
+  workflow_call:
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
 
 permissions:
   actions: write
@@ -16,7 +22,7 @@ permissions:
 jobs:
   release:
     name: ▶️ Run
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Dump GitHub context
