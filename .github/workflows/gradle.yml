@@ -73,9 +73,6 @@ jobs:
         if: ${{ inputs.library }}
         run: ./gradlew publish
 
-      - name: 💻 Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: 👷‍♂️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -102,7 +99,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
         #  platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache,mode=max
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache,mode=min
 
       - name: 🏷 Extract metadata for Docker
         id: meta-native
