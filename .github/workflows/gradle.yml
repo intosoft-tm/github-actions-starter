@@ -89,6 +89,14 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
 
+      - name: Cache main image layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-main-cache
+          key: ${{ runner.os }}-buildx-main
+          restore-keys: |
+            ${{ runner.os }}-buildx-main
+
       - name: 🐋 Build and push
         uses: docker/build-push-action@v6
         with:
@@ -98,8 +106,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
         #  platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache,mode=min
+          cache-from: type=local,src=/tmp/.buildx-main-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-main-cache
 
       - name: 🏷 Extract metadata for Docker
         id: meta-native
@@ -119,6 +127,6 @@ jobs:
           push: true
           tags: ${{ steps.meta-native.outputs.tags }}
           labels: ${{ steps.meta-native.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+#          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
