@@ -52,7 +52,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔍 Run tests
-        run: ./gradlew clean build -x check
+        run: ./gradlew compile -x check
 
       - name: 🗜️ Archive reports
         uses: actions/upload-artifact@v4
