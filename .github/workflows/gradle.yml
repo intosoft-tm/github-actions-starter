@@ -73,6 +73,12 @@ jobs:
         if: ${{ inputs.library }}
         run: ./gradlew publish
 
+      - name: Install directory-checksum
+        run: go install github.com/MShekow/directory-checksum@latest
+
+      - name: Run directory-checksum
+        run: directory-checksum --max-depth=4
+
       - name: 👷‍♂️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
