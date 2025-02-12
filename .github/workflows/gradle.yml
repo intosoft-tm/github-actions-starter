@@ -65,6 +65,10 @@ jobs:
         if: ${{ !inputs.library }}
         run: ./gradlew bootJar
 
+      - name: 📦 Unpack packaging
+        if: ${{ !inputs.library }}
+        run: ./gradlew extractLayers
+
       - name: 🚀 Build native image with Gradle
         if: ${{ inputs.native }}
         run: ./gradlew nativeCompile
