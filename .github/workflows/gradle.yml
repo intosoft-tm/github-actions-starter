@@ -109,24 +109,24 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-main-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-main-cache
 
-      - name: 🏷 Extract metadata for Docker
-        id: meta-native
-        if: ${{ inputs.native }}
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          flavor:
-            suffix=-native
-
-      - name: 🐋 Build and push
-        uses: docker/build-push-action@v5
-        if: ${{ inputs.native }}
-        with:
-          context: .
-          file: docker/Dockerfile.native
-          push: true
-          tags: ${{ steps.meta-native.outputs.tags }}
-          labels: ${{ steps.meta-native.outputs.labels }}
-#          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+#      - name: 🏷 Extract metadata for Docker
+#        id: meta-native
+#        if: ${{ inputs.native }}
+#        uses: docker/metadata-action@v5
+#        with:
+#          images: ghcr.io/${{ github.repository }}
+#          flavor:
+#            suffix=-native
+#
+#      - name: 🐋 Build and push
+#        uses: docker/build-push-action@v5
+#        if: ${{ inputs.native }}
+#        with:
+#          context: .
+#          file: docker/Dockerfile.native
+#          push: true
+#          tags: ${{ steps.meta-native.outputs.tags }}
+#          labels: ${{ steps.meta-native.outputs.labels }}
+##          platforms: linux/amd64,linux/arm64
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
