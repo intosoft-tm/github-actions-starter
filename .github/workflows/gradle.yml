@@ -35,13 +35,13 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-
-      - name: ♻️ Cache build
-        id: cache-build
-        uses: actions/cache@v4
-        with:
-          path: ./build
-          key: ${{ github.run_id }}
+#
+#      - name: ♻️ Cache build
+#        id: cache-build
+#        uses: actions/cache@v4
+#        with:
+#          path: ./build
+#          key: ${{ github.run_id }}
 
       - name: 🔋 Set up Graal VM 21
         uses: graalvm/setup-graalvm@v1
@@ -53,6 +53,9 @@ jobs:
 
       - name: 🔍 Run tests
         run: ./gradlew build -x check
+
+      - name: 🔍 Run tests
+        run: ls -la build/libs
 
       - name: 🗜️ Archive reports
         uses: actions/upload-artifact@v4
