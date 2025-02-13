@@ -65,6 +65,10 @@ jobs:
         if: ${{ inputs.native }}
         run: ./gradlew nativeCompile
 
+      - name: 📦 Unpack packaging
+        if: ${{ !inputs.library }}
+        run: ./gradlew extractLayers
+
       - name: ⬆️ Publish package
         if: ${{ inputs.library }}
         run: ./gradlew publish
