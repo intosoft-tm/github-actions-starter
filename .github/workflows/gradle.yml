@@ -51,8 +51,8 @@ jobs:
           cache: gradle
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔍 Run build
-        run: ./gradlew bootDocker -x check
+      - name: 🔍 Run tests
+        run: ./gradlew build -x check
 
       - name: 🗜️ Archive reports
         uses: actions/upload-artifact@v4
@@ -95,7 +95,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
         #  platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache,mode=min
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache,mode=max
 
       - name: 🏷 Extract metadata for Docker
         id: meta-native
