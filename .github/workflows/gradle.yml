@@ -70,7 +70,10 @@ jobs:
 
       - name: 📦 Unpack packaging
         if: ${{ !inputs.library }}
-        run: ./gradlew extractLayers
+        run: |
+          ./gradlew extractLayers
+          find ./build/extracted -type f -executable -not -perm 777 -exec chmod 777 {} \;
+          find ./build/extracted -type f -not -executable -not -perm 666 -exec chmod 666 {} \;
 
       - name: ⬆️ Publish package
         if: ${{ inputs.library }}
