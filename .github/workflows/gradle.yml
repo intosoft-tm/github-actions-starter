@@ -68,13 +68,6 @@ jobs:
         if: ${{ inputs.native }}
         run: ./gradlew nativeCompile
 
-      - name: 📦 Unpack packaging
-        if: ${{ !inputs.library }}
-        run: |
-          ./gradlew extractLayers
-          find ./build/extracted -type f -executable -not -perm 777 -exec chmod 777 {} \;
-          find ./build/extracted -type f -not -executable -not -perm 666 -exec chmod 666 {} \;
-
       - name: ⬆️ Publish package
         if: ${{ inputs.library }}
         run: ./gradlew publish
@@ -103,9 +96,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-        #  platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:cache2
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:cache2,mode=max
+          build-args: |
+            --progress=plain
 
       - name: 🏷 Extract metadata for Docker
         id: meta-native
