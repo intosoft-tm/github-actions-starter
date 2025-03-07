@@ -54,9 +54,6 @@ jobs:
       - name: 🔍 Run tests
         run: ./gradlew build -x check
 
-      - name: 🔍 Run tests
-        run: ls -la build/libs
-
       - name: 🗜️ Archive reports
         uses: actions/upload-artifact@v4
         if: always()
