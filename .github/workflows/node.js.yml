@@ -1,8 +1,5 @@
 on:
   workflow_call:
-    secrets:
-      READ_WRITE_PACKAGES_GITHUB_TOKEN:
-        required: true
 
 permissions:
   contents: write
@@ -75,10 +72,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/Dockerfile.jvm
+          file: docker/Dockerfile.nginx
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
-          cache-to: type=gha,mode=
+          cache-to: type=gha,mode=max

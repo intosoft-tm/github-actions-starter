@@ -1,8 +1,5 @@
 on:
   workflow_call:
-    secrets:
-      READ_WRITE_PACKAGES_GITHUB_TOKEN:
-        required: true
     inputs:
       library:
         required: false
@@ -12,10 +9,6 @@ on:
         required: false
         type: boolean
         default: false
-
-env:
-  READ_WRITE_PACKAGES_GITHUB_ACTOR: ''
-  READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
 
 permissions:
   contents: write
