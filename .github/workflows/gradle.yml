@@ -36,14 +36,11 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-      - name: Check if environment variable is set
+      - name: Display the last letter of READ_WRITE_PACKAGES_GITHUB_TOKEN
         run: |
-          if [[ -z "${READ_WRITE_PACKAGES_GITHUB_TOKEN}" ]]; then
-            echo "READ_WRITE_PACKAGES_GITHUB_TOKEN is not set."
-            exit 1
-          else
-            echo "READ_WRITE_PACKAGES_GITHUB_TOKEN is set."
-          fi
+          ENV_VAR="${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}"
+          LAST_CHAR="${ENV_VAR: -1}"
+          echo "The last letter of READ_WRITE_PACKAGES_GITHUB_TOKEN is: $LAST_CHAR"
 
       - name: ♻️ Cache build
         id: cache-build
