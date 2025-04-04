@@ -13,6 +13,10 @@ on:
       READ_WRITE_PACKAGES_GITHUB_TOKEN:
         required: true
 
+env:
+  READ_WRITE_PACKAGES_GITHUB_ACTOR: ''
+  READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+
 permissions:
   contents: write
   pull-requests: write
