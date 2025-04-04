@@ -38,7 +38,7 @@ jobs:
 
       - name: Display the last letter of READ_WRITE_PACKAGES_GITHUB_TOKEN
         run: |
-          ENV_VAR="${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}"
+          ENV_VAR="${READ_WRITE_PACKAGES_GITHUB_TOKEN}"
           LAST_CHAR="${ENV_VAR: -1}"
           echo "The last letter of READ_WRITE_PACKAGES_GITHUB_TOKEN is: $LAST_CHAR"
 
