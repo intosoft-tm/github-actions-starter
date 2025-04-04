@@ -7,6 +7,10 @@ on:
       - main
     types:
       - completed
+  workflow_call:
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
 
 permissions:
   actions: write
