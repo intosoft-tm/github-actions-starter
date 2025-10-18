@@ -1,0 +1,63 @@
+name: Java Library CI with Gradle
+
+on:
+  push:
+    tags:
+      - v*.*.*
+  pull_request:
+  workflow_call:
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
+
+env:
+  READ_WRITE_PACKAGES_GITHUB_ACTOR: ''
+  READ_WRITE_PACKAGES_GITHUB_TOKEN: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  gradle-build:
+    name: 🐘 Gradle build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📋 Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: ♻️ Cache build
+        id: cache-build
+        uses: actions/cache@v4
+        with:
+          path: ./build
+          key: ${{ github.run_id }}
+
+      - name: 🔋 Set up Graal VM 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          cache: gradle
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Run build
+        run: ./gradlew build
+
+      - name: 🗜️ Archive reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report
+          path: ./build/reports
+
+      - name: ⬆️ Publish package
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: ./gradlew publish
