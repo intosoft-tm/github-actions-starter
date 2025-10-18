@@ -1,0 +1,39 @@
+name: Release with Release Please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_call:
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: ▶️ Run
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
+    - uses: actions/checkout@v4
+
+    - name: Setup github actions bot
+      run: |
+        git config user.name github-actions[bot]
+        git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+    - name: 🚚 Prepare release
+      uses: googleapis/release-please-action@v4
+      id: release
+      with:
+        token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
