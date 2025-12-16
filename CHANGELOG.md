@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2025-12-16)
+
+## What's Changed
+* feat: add node.js, gradle and docker pipelines by @Tomasz-Marciniak in https://github.com/intosoft-tm/github-actions-starter/pull/89
+
+
+**Full Changelog**: https://github.com/intosoft-tm/github-actions-starter/compare/v0.1.0...v0.2.0
+
 ## [0.1.0](https://github.com/intosoft-tm/github-actions-starter/compare/v0.0.1...v0.1.0) (2024-12-10)
 
 
