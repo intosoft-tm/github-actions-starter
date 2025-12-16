@@ -1,12 +1,13 @@
-name: release
+name: Release with Release Please
 
 on:
-  workflow_run:
-    workflows: [build verify publish test]
+  push:
     branches:
       - main
-    types:
-      - completed
+  workflow_call:
+    secrets:
+      READ_WRITE_PACKAGES_GITHUB_TOKEN:
+        required: true
 
 permissions:
   actions: write
@@ -16,7 +17,7 @@ permissions:
 jobs:
   release:
     name: ▶️ Run
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Dump GitHub context
@@ -28,4 +29,4 @@ jobs:
       uses: googleapis/release-please-action@v4
       id: release
       with:
-        token: ${{ secrets.READ_WRITE_PACKAGES_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
