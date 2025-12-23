@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 (2025-12-23)
+
+**Full Changelog**: https://github.com/intosoft-tm/github-actions-starter/compare/v0.2.0...v0.3.0
+
 ## 0.2.0 (2025-12-16)
 
 ## What's Changed
